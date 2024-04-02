@@ -1,0 +1,73 @@
+---
+title: "route 7 dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(flexdashboard)
+library(readxl)
+```
+
+```{r}
+#Request API
+route7<- GET("https://www3.septa.org/api/TransitView/index.php?route=7")
+```
+
+```{r}
+#Convert to text
+route7content<- content(route7, as = 'text')
+```
+
+```{r}
+#Convert to table
+route7JSON<- fromJSON(route7content)
+```
+
+```{r}
+#Convert to data frame
+route7df <- do.call("cbind", route7JSON)
+```
+
+```{r}
+#Drop inactive buses
+route7df<- subset(route7df, bus.late< 900)
+```
+
+```{r}
+#Convert bus.late so late buses have negative numbers
+route7df$bus.late2 <- with(route7df, bus.late*-1)
+```
+
+## Column {data-width="650"}
+
+### Chart A
+
+```{r}
+ggplot(route7df, aes(x=bus.label, y=bus.late2)) +
+  geom_bar(stat="identity")+
+  coord_flip()
+```
+
+## Column {data-width="350"}
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+
+```{r}
+
+```
